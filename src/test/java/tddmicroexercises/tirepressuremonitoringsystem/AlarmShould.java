@@ -1,5 +1,6 @@
 package tddmicroexercises.tirepressuremonitoringsystem;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -8,12 +9,17 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AlarmShould {
+    private SensorMock sensor;
+    private Alarm alarm;
+
+    @BeforeEach
+    void setUp() {
+        this.sensor = new SensorMock();
+        this.alarm = new Alarm(sensor);
+    }
 
     @Test
     void be_on_when_pressure_value_is_too_low() {
-        SensorMock sensor = new SensorMock();
-        Alarm alarm = new Alarm(sensor);
-
         sensor.stubPopNextPressurePsiValue(10d);
 
         alarm.check();
@@ -23,9 +29,6 @@ class AlarmShould {
 
     @Test
     void be_on_when_pressure_value_is_too_high() {
-        SensorMock sensor = new SensorMock();
-        Alarm alarm = new Alarm(sensor);
-
         sensor.stubPopNextPressurePsiValue(25d);
 
         alarm.check();
