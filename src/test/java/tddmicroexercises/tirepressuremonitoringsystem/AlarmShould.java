@@ -2,23 +2,28 @@ package tddmicroexercises.tirepressuremonitoringsystem;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.exceptions.verification.TooFewActualInvocations;
 import org.mockito.exceptions.verification.TooManyActualInvocations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class AlarmShould {
     private static final double LOW_PRESSURE_THRESHOLD = 17;
     private static final double HIGH_PRESSURE_THRESHOLD = 21;
 
+    @Mock
     private Sensor sensor;
     private Alarm alarm;
 
     @BeforeEach
     void setUp() {
-        this.sensor = mock(Sensor.class);
         this.alarm = spy(new Alarm(sensor));
     }
 
