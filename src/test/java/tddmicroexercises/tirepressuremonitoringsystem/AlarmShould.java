@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AlarmShould {
     private static final double LOW_PRESSURE_THRESHOLD = 17;
+    private static final double HIGH_PRESSURE_THRESHOLD = 21;
 
     private SensorMock sensor;
     private Alarm alarm;
@@ -41,6 +42,15 @@ class AlarmShould {
     @Test
     void be_off_when_pressure_equals_low_threshold() {
         sensor.stubPopNextPressurePsiValue(LOW_PRESSURE_THRESHOLD);
+
+        alarm.check();
+
+        assertThat(alarm.isAlarmOn()).isFalse();
+    }
+
+    @Test
+    void be_off_when_pressure_equals_high_threshold() {
+        sensor.stubPopNextPressurePsiValue(HIGH_PRESSURE_THRESHOLD);
 
         alarm.check();
 
