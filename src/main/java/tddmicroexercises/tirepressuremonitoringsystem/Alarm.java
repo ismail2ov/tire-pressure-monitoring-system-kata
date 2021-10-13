@@ -15,9 +15,7 @@ public class Alarm {
     public void check() {
         double psiPressureValue = getPsiPressureValue();
 
-        if (psiPressureValue < lowPressureThreshold || highPressureThreshold < psiPressureValue) {
-            alarmOn = true;
-        }
+        alarmOn = psiPressureValue < lowPressureThreshold || highPressureThreshold < psiPressureValue;
     }
 
     public boolean isAlarmOn() {

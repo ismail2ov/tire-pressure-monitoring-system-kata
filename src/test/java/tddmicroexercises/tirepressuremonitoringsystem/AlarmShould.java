@@ -83,6 +83,19 @@ class AlarmShould {
         assertThat(alarm.isAlarmOn()).isTrue();
     }
 
+    @Test
+    void be_off_when_the_pressure_value_of_the_last_measurement_is_within_the_range() {
+        sensor.stubPopNextPressurePsiValue(25d);
+        sensor.stubPopNextPressurePsiValue(10d);
+        sensor.stubPopNextPressurePsiValue(19d);
+
+        alarm.check();
+        alarm.check();
+        alarm.check();
+
+        assertThat(alarm.isAlarmOn()).isFalse();
+    }
+
     private class SensorMock implements Sensor {
 
         private final List<Double> stubs = new ArrayList<>();
