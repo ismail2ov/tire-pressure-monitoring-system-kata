@@ -7,18 +7,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AlarmShould {
     private static final double LOW_PRESSURE_THRESHOLD = 17;
     private static final double HIGH_PRESSURE_THRESHOLD = 21;
 
     private SensorMock sensor;
-    private Alarm alarm;
+    private AlarmSpy alarm;
 
     @BeforeEach
     void setUp() {
         this.sensor = new SensorMock();
-        this.alarm = new Alarm(sensor);
+        this.alarm = new AlarmSpy(sensor);
     }
 
     @Test
@@ -96,6 +97,47 @@ class AlarmShould {
         assertThat(alarm.isAlarmOn()).isFalse();
     }
 
+    @Test
+    void call_psi_pressure_value() throws Exception {
+        sensor.stubPopNextPressurePsiValue(19d);
+
+        alarm.check();
+
+        alarm.verify("check");
+        alarm.verify("getPsiPressureValue");
+        alarm.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void throw_an_exception_when_there_are_unexpected_interactions() throws Exception {
+        sensor.stubPopNextPressurePsiValue(19d);
+
+        alarm.check();
+        alarm.check();
+
+        alarm.verify("check");
+        alarm.verify("getPsiPressureValue");
+
+        assertThatThrownBy(() -> alarm.verifyNoMoreInteractions())
+                .isInstanceOf(Exception.class);
+
+    }
+
+    @Test
+    void throw_an_exception_when_there_are_unverified_interactions() throws Exception {
+        sensor.stubPopNextPressurePsiValue(19d);
+
+        alarm.check();
+
+        assertThatThrownBy(() -> {
+            alarm.verify("check");
+            alarm.verify("check");
+            alarm.verify("getPsiPressureValue");
+            alarm.verifyNoMoreInteractions();
+        })
+                .isInstanceOf(Exception.class);
+    }
+
     private class SensorMock implements Sensor {
 
         private final List<Double> stubs = new ArrayList<>();
@@ -103,11 +145,58 @@ class AlarmShould {
 
         @Override
         public double popNextPressurePsiValue() {
+            if (numInteractions >= stubs.size()) {
+                return -1;
+            }
             return stubs.get(numInteractions++);
         }
 
         public void stubPopNextPressurePsiValue(double value) {
             this.stubs.add(value);
+        }
+    }
+
+    private class AlarmSpy extends Alarm {
+        private List<String> interaction = new ArrayList<>();
+
+        public AlarmSpy(SensorMock sensor) {
+            super(sensor);
+        }
+
+        public void check() {
+            this.interaction.add("check");
+            super.check();
+        }
+
+        public boolean isAlarmOn() {
+            this.interaction.add("isAlarmOn");
+            return super.isAlarmOn();
+        }
+
+        protected double getPsiPressureValue() {
+            this.interaction.add("getPsiPressureValue");
+            return super.getPsiPressureValue();
+        }
+
+        public void verify(String methodName) throws Exception {
+            if (interaction.isEmpty()) {
+                throw new Exception();
+            }
+
+            for (String method : interaction) {
+                if (method.equals(methodName)) {
+                    interaction.remove(method);
+                    return;
+                }
+            }
+
+            throw new Exception();
+        }
+
+        public void verifyNoMoreInteractions() throws Exception {
+            if (interaction.size() > 0) {
+                throw new Exception();
+            }
         }
     }
 }
