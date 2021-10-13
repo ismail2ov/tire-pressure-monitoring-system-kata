@@ -21,6 +21,18 @@ class AlarmShould {
         assertThat(alarm.isAlarmOn()).isTrue();
     }
 
+    @Test
+    void be_on_when_pressure_value_is_too_high() {
+        SensorMock sensor = new SensorMock();
+        Alarm alarm = new Alarm(sensor);
+
+        sensor.stubPopNextPressurePsiValue(25d);
+
+        alarm.check();
+
+        assertThat(alarm.isAlarmOn()).isTrue();
+    }
+
     private class SensorMock implements Sensor {
 
         private final List<Double> stubs = new ArrayList<>();
