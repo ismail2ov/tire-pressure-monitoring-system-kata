@@ -9,6 +9,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AlarmShould {
+    private static final double LOW_PRESSURE_THRESHOLD = 17;
+
     private SensorMock sensor;
     private Alarm alarm;
 
@@ -34,6 +36,15 @@ class AlarmShould {
         alarm.check();
 
         assertThat(alarm.isAlarmOn()).isTrue();
+    }
+
+    @Test
+    void be_off_when_pressure_equals_low_threshold() {
+        sensor.stubPopNextPressurePsiValue(LOW_PRESSURE_THRESHOLD);
+
+        alarm.check();
+
+        assertThat(alarm.isAlarmOn()).isFalse();
     }
 
     private class SensorMock implements Sensor {
